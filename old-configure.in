@@ -2236,6 +2236,8 @@ mobile/android)
     ;;
 esac
 
+MOZ_GVR_ANDROID_SDK
+
 dnl ========================================================
 dnl =
 dnl = Toolkit Options

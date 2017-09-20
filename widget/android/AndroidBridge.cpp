@@ -60,6 +60,10 @@ using namespace mozilla::gfx;
 using namespace mozilla::jni;
 using namespace mozilla::java;
 
+#if defined(MOZ_USE_GVR_ANDROID)
+extern bool SetupGVRJNI(JNIEnv* env);
+#endif // MOZ_USE_GVR_ANDROID
+
 AndroidBridge* AndroidBridge::sBridge = nullptr;
 static jobject sGlobalContext = nullptr;
 nsDataHashtable<nsStringHashKey, nsString> AndroidBridge::sStoragePaths;
@@ -186,6 +190,10 @@ AndroidBridge::AndroidBridge()
     jInputStream = inputStream.getGlobalRef();
     jClose = inputStream.getMethod("close", "()V");
     jAvailable = inputStream.getMethod("available", "()I");
+
+#if defined(MOZ_USE_GVR_ANDROID)
+    SetupGVRJNI(jEnv);
+#endif // MOZ_USE_GVR_ANDROID
 }
 
 // Raw JNIEnv variants.

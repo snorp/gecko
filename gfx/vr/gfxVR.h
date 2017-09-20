@@ -35,6 +35,7 @@ enum class VRDeviceType : uint16_t {
   Oculus,
   OpenVR,
   OSVR,
+  GVR,
   Puppet,
   NumVRDeviceTypes
 };
@@ -225,6 +226,7 @@ struct VRDisplayInfo
   Size mStageSize;
   Matrix4x4 mSittingToStandingTransform;
   uint64_t mFrameId;
+  uint32_t mPresentingGeneration;
   VRHMDSensorState mLastSensorState[kVRMaxLatencyFrames];
 
   bool operator==(const VRDisplayInfo& other) const {
@@ -248,7 +250,8 @@ struct VRDisplayInfo
            mEyeTranslation[1] == other.mEyeTranslation[1] &&
            mStageSize == other.mStageSize &&
            mSittingToStandingTransform == other.mSittingToStandingTransform &&
-           mFrameId == other.mFrameId;
+           mFrameId == other.mFrameId &&
+           mPresentingGeneration == other.mPresentingGeneration;
   }
 
   bool operator!=(const VRDisplayInfo& other) const {

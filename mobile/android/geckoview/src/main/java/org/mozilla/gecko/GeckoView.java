@@ -14,6 +14,7 @@ import java.util.Set;
 
 import org.mozilla.gecko.annotation.ReflectionTarget;
 import org.mozilla.gecko.annotation.WrapForJNI;
+import org.mozilla.gecko.GeckoViewInterfaces;
 import org.mozilla.gecko.gfx.LayerView;
 import org.mozilla.gecko.mozglue.JNIObject;
 import org.mozilla.gecko.util.ActivityUtils;
@@ -318,6 +319,25 @@ public class GeckoView extends LayerView {
     protected String mChromeUri;
     protected int mScreenId = 0; // default to the primary screen
 
+    private static GeckoViewInterfaces.GVRDelegate mGVRDelegate;
+
+    public static void setGVRDelegate(GeckoViewInterfaces.GVRDelegate delegate) {
+        mGVRDelegate = delegate;
+    }
+
+    public static void setGVRPaused(final boolean aPaused) {
+        Window.setGVRPaused(aPaused);
+    }
+
+    public static void setGVRPresentingContext(final long aContext) {
+        Window.setGVRPresentingContext(aContext);
+    }
+
+    public static void cleanupGVRNonPresentingContext() {
+        Window.cleanupGVRNonPresentingContext();
+    }
+
+
     @WrapForJNI(dispatchTo = "proxy")
     protected static final class Window extends JNIObject {
         @WrapForJNI(skip = true)
@@ -364,6 +384,74 @@ public class GeckoView extends LayerView {
             view.mNativeQueue.setState(mNativeQueue.getState());
             mNativeQueue = view.mNativeQueue;
         }
+
+        @WrapForJNI
+        private static boolean isGVRPresent() {
+            return mGVRDelegate != null;
+        }
+
+        @WrapForJNI
+        private static long createGVRNonPresentingContext() {
+            if (mGVRDelegate == null) {
+                return 0;
+            }
+            return mGVRDelegate.createGVRNonPresentingContext();
+        }
+
+        @WrapForJNI
+        private static void destroyGVRNonPresentingContext() {
+            if (mGVRDelegate == null) {
+                return;
+            }
+            mGVRDelegate.destroyGVRNonPresentingContext();
+        }
+
+        @WrapForJNI
+        private static void enableVRMode() {
+            if (!ThreadUtils.isOnUiThread()) {
+                ThreadUtils.postToUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        enableVRMode();
+                    }
+                });
+                return;
+            }
+
+            if (mGVRDelegate == null) {
+                return;
+            }
+
+            mGVRDelegate.enableVRMode();
+        }
+
+        @WrapForJNI
+        private static void disableVRMode() {
+            if (!ThreadUtils.isOnUiThread()) {
+                ThreadUtils.postToUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        disableVRMode();
+                    }
+                });
+                return;
+            }
+
+            if (mGVRDelegate == null) {
+                return;
+            }
+
+            mGVRDelegate.disableVRMode();
+        }
+
+        @WrapForJNI(calledFrom = "ui")
+        static native void setGVRPresentingContext(final long aContext);
+
+        @WrapForJNI(calledFrom = "ui")
+        static native void cleanupGVRNonPresentingContext();
+
+        @WrapForJNI(calledFrom = "ui")
+        static native void setGVRPaused(final boolean paused);
     }
 
     // Object to hold onto our nsWindow connection when GeckoView gets destroyed.

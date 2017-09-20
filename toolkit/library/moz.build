@@ -197,6 +197,12 @@ if CONFIG['OS_ARCH'] == 'Linux' and CONFIG['OS_TARGET'] != 'Android':
         'rt',
     ]
 
+if CONFIG['MOZ_USE_GVR_ANDROID']:
+    OS_LIBS += [
+        '-L%s' % CONFIG['MOZ_GVR_LIBS'],
+        '-lgvr',
+    ]
+
 OS_LIBS += CONFIG['MOZ_CAIRO_OSLIBS']
 OS_LIBS += CONFIG['MOZ_WEBRTC_X11_LIBS']
 

@@ -23,7 +23,6 @@
 #elif defined(XP_MACOSX)
 
 #include "mozilla/gfx/MacIOSurface.h"
-
 #endif
 
 using namespace mozilla;
@@ -70,6 +69,7 @@ VRDisplayHost::VRDisplayHost(VRDeviceType aType)
   mDisplayInfo.mPresentingGroups = 0;
   mDisplayInfo.mGroupMask = kVRGroupContent;
   mDisplayInfo.mFrameId = 0;
+  mDisplayInfo.mPresentingGeneration = 0;
 }
 
 VRDisplayHost::~VRDisplayHost()
@@ -331,6 +331,14 @@ VRDisplayHost::SubmitFrame(VRLayerParent* aLayer,
       }
       break;
     }
+#elif defined(MOZ_USE_GVR_ANDROID)
+    case SurfaceDescriptor::TEGLImageDescriptor: {
+       const EGLImageDescriptor& desc = aTexture.get_EGLImageDescriptor();
+       if (!SubmitFrame(&desc, aLeftEyeRect, aRightEyeRect)) {
+         return;
+       }
+       break;
+    }
 #endif
     default: {
       NS_WARNING("Unsupported SurfaceDescriptor type for VR layer texture");
@@ -338,7 +346,8 @@ VRDisplayHost::SubmitFrame(VRLayerParent* aLayer,
     }
   }
 
-#if defined(XP_WIN) || defined(XP_MACOSX)
+#if defined(XP_WIN) || defined(XP_MACOSX) || defined(MOZ_USE_GVR_ANDROID)
+
   /**
    * Trigger the next VSync immediately after we are successfully
    * submitting frames.  As SubmitFrame is responsible for throttling

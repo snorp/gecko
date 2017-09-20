@@ -54,6 +54,9 @@ using mozilla::Unused;
 #include "nsGfxCIID.h"
 
 #include "gfxContext.h"
+#if defined(MOZ_USE_GVR_ANDROID)
+#include "gfxVRGVRAPI.h"
+#endif // MOZ_USE_GVR_ANDROID
 
 #include "Layers.h"
 #include "mozilla/layers/LayerManagerComposite.h"
@@ -297,6 +300,27 @@ public:
     void LoadUri(jni::String::Param aUri, int32_t aFlags);
 
     void EnableEventDispatcher();
+
+    static void SetGVRPresentingContext(const int64_t aContext)
+    {
+#if defined(MOZ_USE_GVR_ANDROID)
+      mozilla::gfx::SetGVRPresentingContext((void*)aContext);
+#endif // MOZ_USE_GVR_ANDROID
+    }
+
+    static void CleanupGVRNonPresentingContext()
+    {
+#if defined(MOZ_USE_GVR_ANDROID)
+      mozilla::gfx::CleanupGVRNonPresentingContext();
+#endif // MOZ_USE_GVR_ANDROID
+    }
+
+    static void SetGVRPaused(const bool aPaused)
+    {
+#if defined(MOZ_USE_GVR_ANDROID)
+      mozilla::gfx::SetGVRPaused(aPaused);
+#endif // MOZ_USE_GVR_ANDROID
+    }
 };
 
 /**
@@ -2382,3 +2406,32 @@ nsWindow::RecvScreenPixels(Shmem&& aMem, const ScreenIntSize& aSize)
   }
 }
 
+void*
+nsWindow::CreateGVRNonPresentingContext()
+{
+  return (void*)GeckoView::Window::CreateGVRNonPresentingContext();
+}
+
+void
+nsWindow::DestroyGVRNonPresentingContext()
+{
+  GeckoView::Window::DestroyGVRNonPresentingContext();
+}
+
+void
+nsWindow::EnableVRMode()
+{
+  GeckoView::Window::EnableVRMode();
+}
+
+void
+nsWindow::DisableVRMode()
+{
+  GeckoView::Window::DisableVRMode();
+}
+
+bool
+nsWindow::IsVRModePresent()
+{
+  return GeckoView::Window::IsGVRPresent();
+}

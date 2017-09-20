@@ -261,11 +261,15 @@ template<class Impl>
 class GeckoView::Window::Natives : public mozilla::jni::NativeImpl<Window, Impl>
 {
 public:
-    static const JNINativeMethod methods[5];
+    static const JNINativeMethod methods[8];
 };
 
 template<class Impl>
 const JNINativeMethod GeckoView::Window::Natives<Impl>::methods[] = {
+
+    mozilla::jni::MakeNativeMethod<GeckoView::Window::CleanupGVRNonPresentingContext_t>(
+            mozilla::jni::NativeStub<GeckoView::Window::CleanupGVRNonPresentingContext_t, Impl>
+            ::template Wrap<&Impl::CleanupGVRNonPresentingContext>),
 
     mozilla::jni::MakeNativeMethod<GeckoView::Window::Close_t>(
             mozilla::jni::NativeStub<GeckoView::Window::Close_t, Impl>
@@ -285,7 +289,15 @@ const JNINativeMethod GeckoView::Window::Natives<Impl>::methods[] = {
 
     mozilla::jni::MakeNativeMethod<GeckoView::Window::Reattach_t>(
             mozilla::jni::NativeStub<GeckoView::Window::Reattach_t, Impl>
-            ::template Wrap<&Impl::Reattach>)
+            ::template Wrap<&Impl::Reattach>),
+
+    mozilla::jni::MakeNativeMethod<GeckoView::Window::SetGVRPaused_t>(
+            mozilla::jni::NativeStub<GeckoView::Window::SetGVRPaused_t, Impl>
+            ::template Wrap<&Impl::SetGVRPaused>),
+
+    mozilla::jni::MakeNativeMethod<GeckoView::Window::SetGVRPresentingContext_t>(
+            mozilla::jni::NativeStub<GeckoView::Window::SetGVRPresentingContext_t, Impl>
+            ::template Wrap<&Impl::SetGVRPresentingContext>)
 };
 
 template<class Impl>

@@ -260,6 +260,7 @@ def old_configure_options(*options):
     '--with-doc-output-dir',
     '--with-float-abi',
     '--with-fpu',
+    '--with-gvr-android-sdk',
     '--with-intl-api',
     '--with-ios-sdk',
     '--with-jitreport-granularity',

@@ -549,6 +549,16 @@ VRDisplayPuppet::SubmitFrame(MacIOSurface* aMacIOSurface,
   return false;
 }
 
+#elif defined(MOZ_USE_GVR_ANDROID)
+
+bool
+VRDisplayPuppet::SubmitFrame(const mozilla::layers::EGLImageDescriptor* aDescriptor,
+                           const gfx::Rect& aLeftEyeRect,
+                           const gfx::Rect& aRightEyeRect) {
+
+  return false;
+}
+
 #endif
 
 void

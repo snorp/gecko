@@ -181,6 +181,40 @@ fi
 
 ])
 
+AC_DEFUN([MOZ_GVR_ANDROID_SDK],
+[
+
+MOZ_ARG_WITH_STRING(gvr-android-sdk,
+[  --with-gvr-android-sdk=DIR
+                          location where the Android GVR SDK can be found (like ~/.mozbuild/gvr-android-sdk)],
+    gvr_android_sdk=$withval)
+
+case "$target" in
+*-android*|*-linuxandroid*)
+    AC_MSG_CHECKING([for GVR Android SDK])
+    if test -d "$gvr_android_sdk" ; then
+        AC_MSG_RESULT([$gvr_android_sdk])
+        AC_DEFINE(MOZ_USE_GVR_ANDROID)
+        MOZ_GVR_INCLUDE=$gvr_android_sdk/libraries/headers/
+        MOZ_GVR_LIBS=$gvr_android_sdk/libraries/jni/armeabi-v7a/
+        if test -d "$MOZ_GVR_INCLUDE" -a -d "$MOZ_GVR_LIBS" ; then
+          MOZ_USE_GVR_ANDROID=1
+          AC_SUBST(MOZ_USE_GVR_ANDROID)
+          AC_SUBST(MOZ_GVR_INCLUDE)
+          AC_SUBST(MOZ_GVR_LIBS)
+        else
+          AC_MSG_ERROR([Could not find GVR NDK. Did you run ./gradlew :extractNdk in $gvr_android_sdk])
+        fi
+    elif test -n "$gvr_android_sdk" ; then
+        AC_MSG_ERROR([Could not find GVR SDK $gvr_android_sdk])
+    else
+        AC_MSG_RESULT([not specified])
+    fi
+    ;;
+esac
+
+])
+
 dnl Configure an Android SDK.
 dnl Arg 1: compile SDK version, like 23.
 dnl Arg 2: target SDK version, like 23.

@@ -940,11 +940,54 @@ auto GeckoView::State::READY() -> State::LocalRef
 const char GeckoView::Window::name[] =
         "org/mozilla/gecko/GeckoView$Window";
 
+constexpr char GeckoView::Window::CleanupGVRNonPresentingContext_t::name[];
+constexpr char GeckoView::Window::CleanupGVRNonPresentingContext_t::signature[];
+
 constexpr char GeckoView::Window::Close_t::name[];
 constexpr char GeckoView::Window::Close_t::signature[];
 
+constexpr char GeckoView::Window::CreateGVRNonPresentingContext_t::name[];
+constexpr char GeckoView::Window::CreateGVRNonPresentingContext_t::signature[];
+
+auto GeckoView::Window::CreateGVRNonPresentingContext() -> int64_t
+{
+    return mozilla::jni::Method<CreateGVRNonPresentingContext_t>::Call(Window::Context(), nullptr);
+}
+
+constexpr char GeckoView::Window::DestroyGVRNonPresentingContext_t::name[];
+constexpr char GeckoView::Window::DestroyGVRNonPresentingContext_t::signature[];
+
+auto GeckoView::Window::DestroyGVRNonPresentingContext() -> void
+{
+    return mozilla::jni::Method<DestroyGVRNonPresentingContext_t>::Call(Window::Context(), nullptr);
+}
+
+constexpr char GeckoView::Window::DisableVRMode_t::name[];
+constexpr char GeckoView::Window::DisableVRMode_t::signature[];
+
+auto GeckoView::Window::DisableVRMode() -> void
+{
+    return mozilla::jni::Method<DisableVRMode_t>::Call(Window::Context(), nullptr);
+}
+
 constexpr char GeckoView::Window::DisposeNative_t::name[];
 constexpr char GeckoView::Window::DisposeNative_t::signature[];
+
+constexpr char GeckoView::Window::EnableVRMode_t::name[];
+constexpr char GeckoView::Window::EnableVRMode_t::signature[];
+
+auto GeckoView::Window::EnableVRMode() -> void
+{
+    return mozilla::jni::Method<EnableVRMode_t>::Call(Window::Context(), nullptr);
+}
+
+constexpr char GeckoView::Window::IsGVRPresent_t::name[];
+constexpr char GeckoView::Window::IsGVRPresent_t::signature[];
+
+auto GeckoView::Window::IsGVRPresent() -> bool
+{
+    return mozilla::jni::Method<IsGVRPresent_t>::Call(Window::Context(), nullptr);
+}
 
 constexpr char GeckoView::Window::LoadUri_t::name[];
 constexpr char GeckoView::Window::LoadUri_t::signature[];
@@ -962,6 +1005,12 @@ constexpr char GeckoView::Window::Open_t::signature[];
 
 constexpr char GeckoView::Window::Reattach_t::name[];
 constexpr char GeckoView::Window::Reattach_t::signature[];
+
+constexpr char GeckoView::Window::SetGVRPaused_t::name[];
+constexpr char GeckoView::Window::SetGVRPaused_t::signature[];
+
+constexpr char GeckoView::Window::SetGVRPresentingContext_t::name[];
+constexpr char GeckoView::Window::SetGVRPresentingContext_t::signature[];
 
 constexpr char GeckoView::Window::SetState_t::name[];
 constexpr char GeckoView::Window::SetState_t::signature[];

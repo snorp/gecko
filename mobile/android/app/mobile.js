@@ -758,7 +758,7 @@ pref("dom.phonenumber.substringmatching.VE", 7);
 
 // Enable hardware-accelerated Skia canvas
 pref("gfx.canvas.azure.backends", "skia");
-pref("gfx.canvas.azure.accelerated", true);
+pref("gfx.canvas.azure.accelerated", false);
 pref("gfx.canvas.azure.accelerated.limit", 64);
 
 // See ua-update.json.in for the packaged UA override list
@@ -920,3 +920,5 @@ pref("media.navigator.permission.device", true);
 #ifdef NIGHTLY_BUILD
 pref("media.videocontrols.lock-video-orientation", true);
 #endif
+
+//pref("dom.vr.autoactivate.enabled", true);
