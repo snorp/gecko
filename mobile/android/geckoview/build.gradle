@@ -2,7 +2,27 @@ buildDir "${topobjdir}/gradle/build/mobile/android/geckoview"
 
 apply plugin: 'com.android.library'
 
-def VERSION_NAME = '0.0.1'
+def computeVersionCode() {
+    String appVersion = mozconfig.substs.MOZ_APP_VERSION
+
+    // Strip out the 'a1' or similar and split on the dot delimiter
+    String[] parts = appVersion.substring(0, appVersion.size() - 2).split('\\.')
+
+    assert parts.size() == 2 || parts.size() == 3
+
+    // Major
+    int code = Integer.parseInt(parts[0]) * 10000
+
+    // Minor
+    code += Integer.parseInt(parts[1]) * 100
+
+    // Build
+    if (parts.size() == 3) {
+        code += Integer.parseInt(parts[2])
+    }
+
+    return code;
+}
 
 android {
     compileSdkVersion project.ext.compileSdkVersion
@@ -16,11 +36,8 @@ android {
         minSdkVersion project.ext.minSdkVersion
         manifestPlaceholders = project.ext.manifestPlaceholders
 
-        // TODO: version GeckoView explicitly.  We'd like to avoid
-        // mozconfig.substs.ANDROID_VERSION_CODE, which won't be intuitive to
-        // consumer (and advances very quickly on pre-release channels).
-        versionCode 1
-        versionName VERSION_NAME
+        versionCode computeVersionCode()
+        versionName mozconfig.substs.MOZ_APP_VERSION
         consumerProguardFiles 'proguard-rules.txt'
 
         // TODO: ensure these fields always agree with mobile/android/geckoview/BuildConfig.java.in,
@@ -143,9 +160,9 @@ android.libraryVariants.all { variant ->
         destinationDir = new File(destinationDir, variant.baseName)
         source = files(variant.javaCompile.source)
         classpath = files(variant.javaCompile.classpath.files) + files(android.bootClasspath)
-        options.windowTitle("Mozilla GeckoView Android API $VERSION_NAME Reference")
-        options.docTitle("Mozilla GeckoView Android API $VERSION_NAME")
-        options.header("Mozilla GeckoView Android API $VERSION_NAME Reference")
+        options.windowTitle("Mozilla GeckoView Android API $mozconfig.substs.MOZ_APP_VERSION Reference")
+        options.docTitle("Mozilla GeckoView Android API $mozconfig.substs.MOZ_APP_VERSION")
+        options.header("Mozilla GeckoView Android API $mozconfig.substs.MOZ_APP_VERSION Reference")
         options.bottom("&copy; 2016 Mozilla. All rights reserved.")
         options.links("http://docs.oracle.com/javase/7/docs/api/")
         options.linksOffline("http://d.android.com/reference/", "$System.env.ANDROID_HOME/docs/reference")
@@ -172,8 +189,8 @@ apply plugin: 'maven'
 uploadArchives {
     repositories.mavenDeployer {
         pom.groupId = 'org.mozilla'
-        pom.artifactId = 'geckoview'
-        pom.version = VERSION_NAME
+        pom.artifactId = "geckoview-$mozconfig.substs.ANDROID_CPU_ARCH"
+        pom.version = mozconfig.substs.MOZ_APP_VERSION
         pom.project {
             licenses {
                 license {
