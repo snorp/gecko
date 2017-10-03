@@ -12,6 +12,7 @@
 #include "nsIContent.h"
 #include "nsISelection.h"
 
+#include "mozilla/EventStateManager.h"
 #include "mozilla/IMEStateManager.h"
 #include "mozilla/TextComposition.h"
 #include "mozilla/TextEventDispatcherListener.h"
@@ -1155,7 +1156,8 @@ GeckoEditableSupport::SetInputContext(const InputContext& aContext,
     mInputContext = aContext;
 
     if (mInputContext.mIMEState.mEnabled == IMEState::ENABLED &&
-        aAction.UserMightRequestOpenVKB()) {
+        EventStateManager::IsHandlingUserInput() &&
+        aAction.mFocusChange == InputContextAction::FOCUS_NOT_CHANGED) {
         // Don't reset keyboard when we should simply open the vkb
         mEditable->NotifyIME(GeckoEditableListener::NOTIFY_IME_OPEN_VKB);
         return;
@@ -1167,7 +1169,7 @@ GeckoEditableSupport::SetInputContext(const InputContext& aContext,
     mIMEUpdatingContext = true;
 
     RefPtr<GeckoEditableSupport> self(this);
-    bool isUserAction = aAction.IsUserAction();
+    const bool isUserAction = EventStateManager::IsHandlingUserInput();
 
     nsAppShell::PostEvent([this, self, isUserAction] {
         nsCOMPtr<nsIWidget> widget = GetWidget();
