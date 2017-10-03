@@ -199,7 +199,7 @@ if CONFIG['OS_ARCH'] == 'Linux' and CONFIG['OS_TARGET'] != 'Android':
 
 if CONFIG['OS_TARGET'] == 'Android':
     OS_LIBS += [
-        '-L/Users/rbarker/vr/gvr-android-sdk/libraries/jni/armeabi-v7a',
+        '-L/home/snorp/source/gvr-android-sdk/libraries/jni/armeabi-v7a',
         '-lgvr',
     ]
 

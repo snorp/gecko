@@ -60,7 +60,7 @@ if CONFIG['OS_TARGET'] == 'Android':
         'gfxVRGVR.cpp',
         'jni/gfxGVRJNI.cpp',
     ]
-    CXXFLAGS += ['-I/Users/rbarker/vr/gvr-android-sdk/libraries/headers']
+    CXXFLAGS += ['-I/home/snorp/source/gvr-android-sdk/libraries/headers']
     LOCAL_INCLUDES += ['/widget/android']
 
 IPDL_SOURCES = [
