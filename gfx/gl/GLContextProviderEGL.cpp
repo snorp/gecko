@@ -218,6 +218,7 @@ GLContextEGL::GLContextEGL(CreateContextFlags flags, const SurfaceCaps& caps,
     , mSurfaceOverride(EGL_NO_SURFACE)
     , mThebesSurface(nullptr)
     , mBound(false)
+    , mIsSurfaceless(surface == EGL_NO_SURFACE)
     , mIsPBuffer(false)
     , mIsDoubleBuffered(false)
     , mCanBindToTexture(false)
@@ -244,7 +245,9 @@ GLContextEGL::~GLContextEGL()
 
     sEGLLibrary.fDestroyContext(EGL_DISPLAY(), mContext);
 
-    mozilla::gl::DestroySurface(mSurface);
+    if (!mIsSurfaceless) {
+        mozilla::gl::DestroySurface(mSurface);
+    }
 }
 
 bool
@@ -325,6 +328,10 @@ GLContextEGL::ReleaseTexImage()
 
 void
 GLContextEGL::SetEGLSurfaceOverride(EGLSurface surf) {
+    if (mIsSurfaceless) {
+        return;
+    }
+
     if (Screen()) {
         /* Blit `draw` to `read` if we need to, before we potentially juggle
           * `read` around. If we don't, we might attach a different `read`,
@@ -348,12 +355,17 @@ GLContextEGL::MakeCurrentImpl(bool aForce) {
     // still expensive.
     bool needsMakeCurrent = (aForce || sEGLLibrary.fGetCurrentContext() != mContext);
     if (needsMakeCurrent) {
-        EGLSurface surface = mSurfaceOverride != EGL_NO_SURFACE
-                              ? mSurfaceOverride
-                              : mSurface;
-        if (surface == EGL_NO_SURFACE) {
-            return false;
+        EGLSurface surface = EGL_NO_SURFACE;
+
+        if (!mIsSurfaceless) {
+            surface = mSurfaceOverride != EGL_NO_SURFACE
+                                  ? mSurfaceOverride
+                                  : mSurface;
+            if ((surface == EGL_NO_SURFACE) && !mIsSurfaceless) {
+                return false;
+            }
         }
+
         succeeded = sEGLLibrary.fMakeCurrent(EGL_DISPLAY(),
                                               surface, surface,
                                               mContext);
@@ -389,6 +401,23 @@ GLContextEGL::RenewSurface(CompositorWidget* aWidget) {
     ReleaseSurface();
     MOZ_ASSERT(aWidget);
     mSurface = mozilla::gl::CreateSurfaceFromNativeWindow(GET_NATIVE_WINDOW_FROM_COMPOSITOR_WIDGET(aWidget), mConfig);
+    if (!mSurface) {
+        return false;
+    }
+    return MakeCurrent(true);
+}
+
+bool
+GLContextEGL::RenewSurfaceFromNativeWindow(EGLNativeWindowType window)
+{
+    if (!mOwnsContext) {
+        return false;
+    }
+    // unconditionally release the surface and create a new one. Don't try to optimize this away.
+    // If we get here, then by definition we know that we want to get a new surface.
+    ReleaseSurface();
+    MOZ_ASSERT(window);
+    mSurface = mozilla::gl::CreateSurfaceFromNativeWindow(window, mConfig);
     if (!mSurface) {
         return false;
     }
@@ -940,6 +969,43 @@ GLContextEGL::CreateEGLPBufferOffscreenContext(CreateContextFlags flags,
     if (!gl) {
         NS_WARNING("Failed to create GLContext from PBuffer");
         sEGLLibrary.fDestroySurface(sEGLLibrary.Display(), surface);
+        return nullptr;
+    }
+
+    return gl.forget();
+}
+
+/* static */ already_AddRefed<GLContextEGL>
+GLContextEGL::CreateGLContextEGL(CreateContextFlags flags,
+                                 const SurfaceCaps& caps,
+                                 EGLNativeWindowType window)
+{
+    SurfaceCaps configCaps;
+    EGLConfig config = ChooseConfig(&sEGLLibrary, flags, caps, &configCaps);
+    if (config == EGL_NO_CONFIG) {
+        NS_WARNING("Failed to find a compatible config.");
+        return nullptr;
+    }
+    sEGLLibrary.DumpEGLConfig(config);
+    EGLSurface surface = EGL_NO_SURFACE;
+    if (window) {
+        surface = CreateSurfaceFromNativeWindow(window, config);
+    }
+
+    if (window && !surface) {
+        NS_WARNING("Failed to create EGLSurface for context!");
+        return nullptr;
+    }
+
+    nsCString failureId;
+    RefPtr<GLContextEGL> gl = GLContextEGL::CreateGLContext(flags, configCaps, true,
+                                                            config, surface,
+                                                            &failureId);
+    if (!gl) {
+        NS_WARNING("Failed to create GLContext from EGLSurface");
+        if (surface) {
+            sEGLLibrary.fDestroySurface(sEGLLibrary.Display(), surface);
+        }
         return nullptr;
     }
 

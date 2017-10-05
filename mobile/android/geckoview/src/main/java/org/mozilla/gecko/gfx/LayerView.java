@@ -14,6 +14,7 @@ import org.mozilla.gecko.annotation.WrapForJNI;
 import org.mozilla.gecko.GeckoAccessibility;
 import org.mozilla.gecko.GeckoAppShell;
 import org.mozilla.gecko.GeckoThread;
+import org.mozilla.gecko.GeckoViewInterfaces;
 import org.mozilla.gecko.mozglue.JNIObject;
 import org.mozilla.gecko.util.ThreadUtils;
 
@@ -67,6 +68,70 @@ public class LayerView extends FrameLayout {
     private int mDefaultClearColor = Color.WHITE;
     /* package */ GetPixelsResult mGetPixelsResult;
     private final List<DrawListener> mDrawListeners;
+
+    private static GeckoViewInterfaces.GVRDelegate mGVRDelegate;
+
+    @WrapForJNI(stubName="GVRIsPresent") private volatile static boolean mGVRIsPresent;
+
+    public static void setLayerViewGVRDelegate(GeckoViewInterfaces.GVRDelegate delegate) {
+        mGVRDelegate = delegate;
+        mGVRIsPresent = mGVRDelegate != null;
+    }
+
+    // Their can be only one GVRContext regardless the number of LayerViews.
+    @WrapForJNI(stubName="GVRContext")
+    private static long getGVRContext() {
+        if (mGVRDelegate == null) {
+            return 0;
+        }
+        return mGVRDelegate.getGVRContext();
+    }
+    @WrapForJNI(stubName="GVRPresentingContext") private volatile static long mGVRPresentingContext;
+    @WrapForJNI(stubName="GVRSurface") private volatile static Object mGVRSurface;;
+
+    public static void setGVRContextAndSurface(final long context, final Object surface) {
+        mGVRPresentingContext = context;
+        mGVRSurface = surface;
+        updateGVRSurface();
+    }
+
+    @WrapForJNI
+    private static void enableVRMode() {
+        if (!ThreadUtils.isOnUiThread()) {
+            ThreadUtils.postToUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    enableVRMode();
+                }
+            });
+            return;
+        }
+
+        if (mGVRDelegate == null) {
+            return;
+        }
+
+        mGVRDelegate.enableVRMode();
+    }
+
+    @WrapForJNI
+    private static void disableVRMode() {
+        if (!ThreadUtils.isOnUiThread()) {
+            ThreadUtils.postToUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    disableVRMode();
+                }
+            });
+            return;
+        }
+
+        if (mGVRDelegate == null) {
+            return;
+        }
+
+        mGVRDelegate.disableVRMode();
+    }
 
     /* This is written by the Gecko thread and the UI thread, and read by the UI thread. */
     /* package */ volatile boolean mCompositorCreated;
@@ -672,15 +737,18 @@ public class LayerView extends FrameLayout {
         @Override
         public void surfaceChanged(SurfaceHolder holder, int format, int width,
                                                 int height) {
+Log.e("reb","LayerView surfaceChanged: " + width + "x" + height);
             onSizeChanged(width, height);
         }
 
         @Override
         public void surfaceCreated(SurfaceHolder holder) {
+Log.e("reb","LayerView surfaceCreated");
         }
 
         @Override
         public void surfaceDestroyed(SurfaceHolder holder) {
+Log.e("reb","LayerView surfaceDestroyed");
             onDestroyed();
         }
     }
@@ -829,4 +897,7 @@ public class LayerView extends FrameLayout {
     public boolean isIMEEnabled() {
         return false;
     }
+
+    @WrapForJNI(calledFrom = "ui")
+    private static native void updateGVRSurface();
 }

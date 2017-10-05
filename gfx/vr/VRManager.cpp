@@ -22,6 +22,10 @@
 #include "gfxVROpenVR.h"
 #include "gfxVROSVR.h"
 #endif
+#if defined(MOZ_WIDGET_ANDROID)
+#include "gfxVRGVR.h"
+#endif
+
 #include "gfxVRPuppet.h"
 #include "ipc/VRLayerParent.h"
 
@@ -90,6 +94,13 @@ VRManager::VRManager()
       mManagers.AppendElement(mgr);
   }
 #endif
+
+#if defined(MOZ_WIDGET_ANDROID)
+   mgr = VRSystemManagerGVR::Create();
+   if (mgr) {
+     mManagers.AppendElement(mgr);
+   }
+#endif //defined(MOZ_WIDGET_ANDROID)
   // Enable gamepad extensions while VR is enabled.
   // Preference only can be set at the Parent process.
   if (XRE_IsParentProcess() && gfxPrefs::VREnabled()) {

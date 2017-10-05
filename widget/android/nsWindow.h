@@ -347,6 +347,15 @@ private:
 
     int64_t GetRootLayerId() const;
     RefPtr<mozilla::layers::UiCompositorControllerChild> GetUiCompositorControllerChild();
+
+public:
+    // Gets the GVRContext is one has been set.
+    static void* GetGVRContext();
+    static void* GetGVRPresentingContext();
+    static void* GetGVRANativeWindow();
+    static void EnableVRMode();
+    static void DisableVRMode();
+    static bool IsVRModePresent();
 };
 
 // Explicit template declarations to make clang be quiet.

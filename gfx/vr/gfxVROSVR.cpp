@@ -342,6 +342,16 @@ VRDisplayOSVR::SubmitFrame(MacIOSurface* aMacIOSurface,
   return false;
 }
 
+#elif defined(MOZ_WIDGET_ANDROID)
+
+bool
+VRDisplayOSVR::SubmitFrame(const mozilla::layers::EGLImageDescriptor*,
+                           const gfx::Rect& aLeftEyeRect,
+                           const gfx::Rect& aRightEyeRect) {
+  // XXX Add code to submit frame
+  return false;
+}
+
 #endif
 
 void

@@ -20,7 +20,6 @@
 #elif defined(XP_MACOSX)
 
 #include "mozilla/gfx/MacIOSurface.h"
-
 #endif
 
 using namespace mozilla;
@@ -337,6 +336,14 @@ VRDisplayHost::SubmitFrame(VRLayerParent* aLayer,
       }
       break;
     }
+#elif defined(MOZ_WIDGET_ANDROID)
+    case SurfaceDescriptor::TEGLImageDescriptor: {
+       const EGLImageDescriptor& desc = aTexture.get_EGLImageDescriptor();
+       if (!SubmitFrame(&desc, aLeftEyeRect, aRightEyeRect)) {
+         return;
+       }
+       break;
+    }
 #endif
     default: {
       NS_WARNING("Unsupported SurfaceDescriptor type for VR layer texture");
@@ -344,7 +351,7 @@ VRDisplayHost::SubmitFrame(VRLayerParent* aLayer,
     }
   }
 
-#if defined(XP_WIN) || defined(XP_MACOSX)
+#if defined(XP_WIN) || defined(XP_MACOSX) || defined(MOZ_WIDGET_ANDROID)
 
   /**
    * Trigger the next VSync immediately after we are successfully

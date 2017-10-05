@@ -54,6 +54,7 @@ using mozilla::Unused;
 #include "nsGfxCIID.h"
 
 #include "gfxContext.h"
+#include "gfxVRAndroidGLContext.h"
 
 #include "Layers.h"
 #include "mozilla/layers/LayerManagerComposite.h"
@@ -102,6 +103,10 @@ NS_IMPL_ISUPPORTS_INHERITED0(nsWindow, nsBaseWidget)
 #include "mozilla/layers/UiCompositorControllerChild.h"
 #include "mozilla/Services.h"
 #include "nsThreadUtils.h"
+
+#include <android/log.h>
+#define RLOG(format, ...) __android_log_print(ANDROID_LOG_INFO, "reb", format, ##__VA_ARGS__);
+#define RLINE RLOG("%s:%s:%d", __FILE__, __FUNCTION__, __LINE__)
 
 // All the toplevel windows that have been created; these are in
 // stacking order, so the window at gTopLevelWindows[0] is the topmost
@@ -753,6 +758,17 @@ nsWindow::AndroidView::GetSettings(JSContext* aCx, JS::MutableHandleValue aOut)
     auto lock = mSettings.Lock();
     return widget::EventDispatcher::UnboxBundle(aCx, mSettings, aOut);
 }
+
+class GVRSupport final : public LayerView::Natives<GVRSupport>
+{
+public:
+   GVRSupport() = delete;
+   static void UpdateGVRSurface()
+   {
+      mozilla::gfx::SetGVRANativeWindow(nsWindow::GetGVRPresentingContext(), nsWindow::GetGVRANativeWindow());
+RLOG("GVRSupport::UpdateGVRSurface");
+   }
+};
 
 /**
  * Compositor has some unique requirements for its native calls, so make it
@@ -1423,6 +1439,8 @@ nsWindow::InitNatives()
     if (jni::IsFennec()) {
         nsWindow::PMPMSupport::Init();
     }
+RLOG("calling GVRSupport::Init();");
+    GVRSupport::Init();
 }
 
 nsWindow*
@@ -2382,3 +2400,40 @@ nsWindow::RecvScreenPixels(Shmem&& aMem, const ScreenIntSize& aSize)
   }
 }
 
+void*
+nsWindow::GetGVRContext()
+{
+  return (void*)LayerView::GVRContext();
+}
+
+void*
+nsWindow::GetGVRPresentingContext()
+{
+  return (void*)LayerView::GVRPresentingContext();
+}
+static jni::Object::GlobalRef sGVRSurface;
+
+void*
+nsWindow::GetGVRANativeWindow()
+{
+  sGVRSurface = LayerView::GVRSurface();
+  return (void*)sGVRSurface.Get();
+}
+
+void
+nsWindow::EnableVRMode()
+{
+  LayerView::EnableVRMode();
+}
+
+void
+nsWindow::DisableVRMode()
+{
+  LayerView::DisableVRMode();
+}
+
+bool
+nsWindow::IsVRModePresent()
+{
+  return LayerView::GVRIsPresent();
+}

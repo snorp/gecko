@@ -1223,6 +1223,22 @@ auto GeckoSurfaceTexture::UpdateTexImage() const -> void
 const char LayerView::name[] =
         "org/mozilla/gecko/gfx/LayerView";
 
+constexpr char LayerView::DisableVRMode_t::name[];
+constexpr char LayerView::DisableVRMode_t::signature[];
+
+auto LayerView::DisableVRMode() -> void
+{
+    return mozilla::jni::Method<DisableVRMode_t>::Call(LayerView::Context(), nullptr);
+}
+
+constexpr char LayerView::EnableVRMode_t::name[];
+constexpr char LayerView::EnableVRMode_t::signature[];
+
+auto LayerView::EnableVRMode() -> void
+{
+    return mozilla::jni::Method<EnableVRMode_t>::Call(LayerView::Context(), nullptr);
+}
+
 constexpr char LayerView::GetCompositor_t::name[];
 constexpr char LayerView::GetCompositor_t::signature[];
 
@@ -1231,12 +1247,62 @@ auto LayerView::GetCompositor() const -> mozilla::jni::Object::LocalRef
     return mozilla::jni::Method<GetCompositor_t>::Call(LayerView::mCtx, nullptr);
 }
 
+constexpr char LayerView::GVRContext_t::name[];
+constexpr char LayerView::GVRContext_t::signature[];
+
+auto LayerView::GVRContext() -> int64_t
+{
+    return mozilla::jni::Method<GVRContext_t>::Call(LayerView::Context(), nullptr);
+}
+
 constexpr char LayerView::IsCompositorReady_t::name[];
 constexpr char LayerView::IsCompositorReady_t::signature[];
 
 auto LayerView::IsCompositorReady() const -> bool
 {
     return mozilla::jni::Method<IsCompositorReady_t>::Call(LayerView::mCtx, nullptr);
+}
+
+constexpr char LayerView::UpdateGVRSurface_t::name[];
+constexpr char LayerView::UpdateGVRSurface_t::signature[];
+
+constexpr char LayerView::GVRIsPresent_t::name[];
+constexpr char LayerView::GVRIsPresent_t::signature[];
+
+auto LayerView::GVRIsPresent() -> bool
+{
+    return mozilla::jni::Field<GVRIsPresent_t>::Get(LayerView::Context(), nullptr);
+}
+
+auto LayerView::GVRIsPresent(bool a0) -> void
+{
+    return mozilla::jni::Field<GVRIsPresent_t>::Set(LayerView::Context(), nullptr, a0);
+}
+
+constexpr char LayerView::GVRPresentingContext_t::name[];
+constexpr char LayerView::GVRPresentingContext_t::signature[];
+
+auto LayerView::GVRPresentingContext() -> int64_t
+{
+    return mozilla::jni::Field<GVRPresentingContext_t>::Get(LayerView::Context(), nullptr);
+}
+
+auto LayerView::GVRPresentingContext(int64_t a0) -> void
+{
+    return mozilla::jni::Field<GVRPresentingContext_t>::Set(LayerView::Context(), nullptr, a0);
+}
+
+constexpr char LayerView::GVRSurface_t::name[];
+constexpr char LayerView::GVRSurface_t::signature[];
+
+auto LayerView::GVRSurface() -> mozilla::jni::Object::LocalRef
+{
+    return mozilla::jni::Field<GVRSurface_t>::Get(LayerView::Context(), nullptr);
+}
+
+auto LayerView::GVRSurface(mozilla::jni::Object::Param a0) -> void
+{
+    return mozilla::jni::Field<GVRSurface_t>::Set(LayerView::Context(), nullptr, a0);
 }
 
 const char LayerView::Compositor::name[] =

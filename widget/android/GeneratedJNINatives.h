@@ -354,6 +354,21 @@ const JNINativeMethod SurfaceTextureListener::Natives<Impl>::methods[] = {
 };
 
 template<class Impl>
+class LayerView::Natives : public mozilla::jni::NativeImpl<LayerView, Impl>
+{
+public:
+    static const JNINativeMethod methods[1];
+};
+
+template<class Impl>
+const JNINativeMethod LayerView::Natives<Impl>::methods[] = {
+
+    mozilla::jni::MakeNativeMethod<LayerView::UpdateGVRSurface_t>(
+            mozilla::jni::NativeStub<LayerView::UpdateGVRSurface_t, Impl>
+            ::template Wrap<&Impl::UpdateGVRSurface>)
+};
+
+template<class Impl>
 class LayerView::Compositor::Natives : public mozilla::jni::NativeImpl<Compositor, Impl>
 {
 public:

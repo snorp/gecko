@@ -55,6 +55,14 @@ if CONFIG['OS_TARGET'] == 'WINNT':
         'gfxVROculus.cpp',
     ]
 
+if CONFIG['OS_TARGET'] == 'Android':
+    SOURCES += [
+        'gfxVRGVR.cpp',
+        'jni/gfxGVRJNI.cpp',
+    ]
+    CXXFLAGS += ['-I/Users/rbarker/vr/gvr-android-sdk/libraries/headers']
+    LOCAL_INCLUDES += ['/widget/android']
+
 IPDL_SOURCES = [
     'ipc/PVRLayer.ipdl',
     'ipc/PVRManager.ipdl',

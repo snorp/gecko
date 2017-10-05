@@ -1187,6 +1187,9 @@ varargs.h
 vcclr.h
 View.h
 Volume.h
+#ifdef ANDROID
+vr/gvr/capi/include/gvr.h
+#endif
 wab.h
 wait.h
 wchar.h

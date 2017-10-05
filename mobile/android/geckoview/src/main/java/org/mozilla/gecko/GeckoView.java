@@ -14,6 +14,7 @@ import java.util.Set;
 
 import org.mozilla.gecko.annotation.ReflectionTarget;
 import org.mozilla.gecko.annotation.WrapForJNI;
+import org.mozilla.gecko.GeckoViewInterfaces;
 import org.mozilla.gecko.gfx.LayerView;
 import org.mozilla.gecko.mozglue.JNIObject;
 import org.mozilla.gecko.util.ActivityUtils;

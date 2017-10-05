@@ -103,12 +103,18 @@ public:
     void UnbindTex2DOffscreen(GLContext* aOffscreen);
     void BindOffscreenFramebuffer();
 
+    bool RenewSurfaceFromNativeWindow(EGLNativeWindowType window);
+
     static already_AddRefed<GLContextEGL>
     CreateEGLPBufferOffscreenContext(CreateContextFlags flags,
                                      const gfx::IntSize& size,
                                      const SurfaceCaps& minCaps,
                                      nsACString* const out_FailureId);
 
+    static already_AddRefed<GLContextEGL>
+    CreateGLContextEGL(CreateContextFlags flags,
+                       const SurfaceCaps& caps,
+                       EGLNativeWindowType window);
 protected:
     friend class GLContextProviderEGL;
     friend class GLContextEGLFactory;
@@ -124,6 +130,7 @@ protected:
     RefPtr<gfxASurface> mThebesSurface;
     bool mBound;
 
+    bool mIsSurfaceless;
     bool mIsPBuffer;
     bool mIsDoubleBuffered;
     bool mCanBindToTexture;
