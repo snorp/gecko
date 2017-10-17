@@ -8,6 +8,7 @@ const { classes: Cc, interfaces: Ci, utils: Cu, results: Cr } = Components;
 
 Cu.import("resource://gre/modules/AppConstants.jsm");
 Cu.import("resource://gre/modules/XPCOMUtils.jsm");
+Cu.import("resource://gre/modules/ConsoleAPI.jsm");
 
 XPCOMUtils.defineLazyModuleGetter(this, "EventDispatcher",
   "resource://gre/modules/Messaging.jsm");
